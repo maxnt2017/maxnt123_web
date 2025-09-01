@@ -5,42 +5,114 @@
     <title>Віджети</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #2e7d32; /* Гарний зелений фон */
-            color: white;
+            color: #ffffff;
             padding: 20px;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
         .container {
             display: flex;
             flex-wrap: wrap;
             gap: 20px;
             justify-content: center;
+            max-width: 1200px;
+            width: 100%;
         }
         .widget {
             background-color: #4caf50;
             padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            width: 400px;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 500px;
+            box-sizing: border-box;
+            text-align: center;
         }
         .widget h2 {
             margin-top: 0;
-            text-align: center;
+            font-size: 1.8em;
+            border-bottom: 2px solid #388e3c;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
         }
         iframe {
             width: 100%;
             height: 400px;
             border: none;
-            border-radius: 5px;
+            border-radius: 8px;
         }
-        .deepstate-widget {
-            text-align: center;
+        .deepstate-widget img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            transition: transform 0.3s ease;
+        }
+        .deepstate-widget a:hover img {
+            transform: scale(1.05);
         }
         .copyright {
-            text-align: center;
             margin-top: 40px;
-            font-size: 12px;
+            font-size: 0.9em;
             color: rgba(255, 255, 255, 0.7);
+        }
+
+        /* Стилі для віджета годинника-пісочниці */
+        .sand-clock-widget {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 400px; /* Задаємо фіксовану висоту для віджета */
+            background-color: #388e3c; /* Темніший зелений для годинника */
+            border-radius: 8px;
+            color: white;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .sand-clock-widget .time-display {
+            font-size: 3.5em;
+            font-weight: bold;
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+        }
+        .sand-clock-widget .date-display {
+            font-size: 1.2em;
+            margin-bottom: 20px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        .sand-clock-widget .sand-area {
+            width: 100px;
+            height: 150px;
+            background-color: #f0e68c; /* Колір піску */
+            border-radius: 50% / 10%;
+            position: relative;
+            margin-bottom: 10px;
+            animation: fillSand 30s linear infinite alternate; /* Анімація "пересипання" піску */
+        }
+        .sand-clock-widget .sand-area::before,
+        .sand-clock-widget .sand-area::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            right: 0;
+            height: 50%;
+            background-color: #f0e68c;
+            border-radius: 50% / 10%;
+        }
+        .sand-clock-widget .sand-area::before {
+            top: 0;
+            transform: rotate(180deg);
+        }
+        .sand-clock-widget .sand-area::after {
+            bottom: 0;
+        }
+        @keyframes fillSand {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(180deg); }
         }
     </style>
 </head>
@@ -49,26 +121,46 @@
 <div class="container">
     <div class="widget">
         <h2>Календар</h2>
-        <iframe src="https://calendar.google.com/calendar/embed?height=400&wkst=2&ctz=Europe%2FKiev&bgcolor=%234285F4&src=uk.ukrainian%23holiday%40group.v.calendar.google.com&color=%230B8043" style="border:solid 1px #777" width="100%" frameborder="0" scrolling="no"></iframe>
+        <iframe src="https://calendar.google.com/calendar/embed?height=400&wkst=2&ctz=Europe%2FKiev&bgcolor=%234285F4&src=uk.ukrainian%23holiday%40group.v.calendar.google.com&color=%230B8043" style="border:solid 1px #777" frameborder="0" scrolling="no"></iframe>
     </div>
 
     <div class="widget deepstate-widget">
         <h2>DeepState</h2>
-        <a href="https://deepstatemap.live/" target="_blank">
-             <img src="https://deepstatemap.live/images/deepstate_logo_small_dark.png" alt="DeepState Map" style="width: 100%; height: auto; max-width: 300px;">
+        <a href="https://deepstatemap.live/" target="_blank" title="Перейти на DeepState Map">
+             <img src="https://deepstatemap.live/images/deepstate_logo_small_dark.png" alt="DeepState Map">
         </a>
-        <p>Натисніть на зображення, щоб перейти на мапу.</p>
+        <p style="font-size: 0.9em; color: rgba(255, 255, 255, 0.8);">Натисніть на зображення, щоб перейти на мапу.</p>
     </div>
 
     <div class="widget">
-        <h2>Пісочниця (гра)</h2>
-        <iframe src="https://ncase.me/fire/sand.html"></iframe>
+        <h2>Поточний час та дата</h2>
+        <div class="sand-clock-widget">
+            <div class="time-display" id="timeDisplay"></div>
+            <div class="date-display" id="dateDisplay"></div>
+            <div class="sand-area"></div>
+        </div>
     </div>
 </div>
 
 <div class="copyright">
     <p>Copyright: 2017-2025, MaxNT Official - Всі права захищені!</p>
 </div>
+
+<script>
+    function updateClock() {
+        const now = new Date();
+        const optionsTime = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
+        const optionsDate = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+
+        document.getElementById('timeDisplay').textContent = now.toLocaleTimeString('uk-UA', optionsTime);
+        document.getElementById('dateDisplay').textContent = now.toLocaleDateString('uk-UA', optionsDate);
+    }
+
+    // Оновлюємо годинник кожну секунду
+    setInterval(updateClock, 1000);
+    // Викликаємо функцію одразу при завантаженні сторінки
+    updateClock();
+</script>
 
 </body>
 </html>

@@ -4,16 +4,66 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Віджети</title>
     <style>
+        :root {
+            --bg-color: #2e7d32;
+            --main-color: #4caf50;
+            --secondary-color: #388e3c;
+            --text-color: #ffffff;
+            --shadow-color: rgba(0, 0, 0, 0.3);
+            --border-color: #777;
+        }
+
+        body.dark-theme {
+            --bg-color: #1a1a1a;
+            --main-color: #2e2e2e;
+            --secondary-color: #444444;
+            --text-color: #f1f1f1;
+            --shadow-color: rgba(255, 255, 255, 0.1);
+            --border-color: #555;
+        }
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #2e7d32; /* Гарний зелений фон */
-            color: #ffffff;
+            background-color: var(--bg-color);
+            color: var(--text-color);
             padding: 20px;
             margin: 0;
             display: flex;
             flex-direction: column;
             align-items: center;
+            transition: background-color 0.5s ease, color 0.5s ease;
         }
+        .controls {
+            display: flex;
+            justify-content: flex-end;
+            width: 100%;
+            max-width: 1200px;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .controls button {
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            font-size: 1em;
+        }
+        .controls button:hover {
+            background-color: #555;
+            transform: translateY(-2px);
+        }
+        .controls select {
+            padding: 8px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background-color: var(--main-color);
+            color: var(--text-color);
+            cursor: pointer;
+        }
+
         .container {
             display: flex;
             flex-wrap: wrap;
@@ -23,21 +73,23 @@
             width: 100%;
         }
         .widget {
-            background-color: #4caf50;
+            background-color: var(--main-color);
             padding: 20px;
             border-radius: 12px;
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 8px 16px var(--shadow-color);
             width: 100%;
             max-width: 500px;
             box-sizing: border-box;
             text-align: center;
+            transition: background-color 0.5s ease, box-shadow 0.5s ease;
         }
         .widget h2 {
             margin-top: 0;
             font-size: 1.8em;
-            border-bottom: 2px solid #388e3c;
+            border-bottom: 2px solid var(--secondary-color);
             padding-bottom: 10px;
             margin-bottom: 20px;
+            transition: border-bottom-color 0.5s ease;
         }
         iframe {
             width: 100%;
@@ -66,12 +118,13 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            height: 400px; /* Задаємо фіксовану висоту для віджета */
-            background-color: #388e3c; /* Темніший зелений для годинника */
+            height: 400px;
+            background-color: var(--secondary-color);
             border-radius: 8px;
-            color: white;
+            color: var(--text-color);
             padding: 20px;
             box-sizing: border-box;
+            transition: background-color 0.5s ease;
         }
         .sand-clock-widget .time-display {
             font-size: 3.5em;
@@ -87,11 +140,11 @@
         .sand-clock-widget .sand-area {
             width: 100px;
             height: 150px;
-            background-color: #f0e68c; /* Колір піску */
+            background-color: #f0e68c;
             border-radius: 50% / 10%;
             position: relative;
             margin-bottom: 10px;
-            animation: fillSand 30s linear infinite alternate; /* Анімація "пересипання" піску */
+            animation: fillSand 30s linear infinite alternate;
         }
         .sand-clock-widget .sand-area::before,
         .sand-clock-widget .sand-area::after {
@@ -114,16 +167,37 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(180deg); }
         }
+
+        /* Стилі для кнопки теми */
+        .theme-switch {
+            background-color: var(--secondary-color);
+            border: none;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background-color 0.3s ease;
+        }
+        .theme-switch:hover {
+            background-color: #555;
+        }
     </style>
 </head>
 <body>
 
-<div id="google_translate_element" style="position: fixed; top: 10px; right: 10px; z-index: 100;"></div>
+<div class="controls">
+    <select id="language-switcher" onchange="changeLanguage()">
+        <option value="uk" selected>Українська</option>
+        <option value="en">English</option>
+    </select>
+    <button class="theme-switch" onclick="toggleTheme()">Темна тема</button>
+</div>
 
 <div class="container">
     <div class="widget">
         <h2>Календар</h2>
-        <iframe src="https://calendar.google.com/calendar/embed?height=400&wkst=2&ctz=Europe%2FKiev&bgcolor=%234285F4&src=uk.ukrainian%23holiday%40group.v.calendar.google.com&color=%230B8043" style="border:solid 1px #777" frameborder="0" scrolling="no"></iframe>
+        <iframe src="https://calendar.google.com/calendar/embed?height=400&wkst=2&ctz=Europe%2FKiev&bgcolor=%234285F4&src=uk.ukrainian%23holiday%40group.v.calendar.google.com&color=%230B8043" style="border:solid 1px var(--border-color)" frameborder="0" scrolling="no"></iframe>
     </div>
 
     <div class="widget deepstate-widget">
@@ -151,25 +225,49 @@
 <script>
     function updateClock() {
         const now = new Date();
+        const lang = document.documentElement.lang;
         const optionsTime = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
         const optionsDate = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
 
-        document.getElementById('timeDisplay').textContent = now.toLocaleTimeString('uk-UA', optionsTime);
-        document.getElementById('dateDisplay').textContent = now.toLocaleDateString('uk-UA', optionsDate);
+        document.getElementById('timeDisplay').textContent = now.toLocaleTimeString(lang, optionsTime);
+        document.getElementById('dateDisplay').textContent = now.toLocaleDateString(lang, optionsDate);
     }
 
-    // Оновлюємо годинник кожну секунду
     setInterval(updateClock, 1000);
-    // Викликаємо функцію одразу при завантаженні сторінки
     updateClock();
-</script>
 
-<script type="text/javascript">
-    function googleTranslateElementInit() {
-        new google.translate.TranslateElement({pageLanguage: 'uk', includedLanguages: 'en,pl,ru,de', layout: google.translate.TranslateElement.InlineLayout.SIMPLE}, 'google_translate_element');
+    function toggleTheme() {
+        document.body.classList.toggle('dark-theme');
+        const themeButton = document.querySelector('.theme-switch');
+        if (document.body.classList.contains('dark-theme')) {
+            themeButton.textContent = 'Світла тема';
+        } else {
+            themeButton.textContent = 'Темна тема';
+        }
+    }
+
+    function changeLanguage() {
+        const lang = document.getElementById('language-switcher').value;
+        document.documentElement.lang = lang;
+        // Оновлення тексту в залежності від мови
+        if (lang === 'en') {
+            document.querySelector('.theme-switch').textContent = 'Light/Dark Theme';
+            document.querySelector('.copyright p').textContent = 'Copyright: 2017-2025, MaxNT Official - All rights reserved!';
+            document.querySelector('.widget h2').textContent = 'Calendar';
+            document.querySelectorAll('.widget h2')[1].textContent = 'DeepState';
+            document.querySelectorAll('.widget h2')[2].textContent = 'Current Time & Date';
+            document.querySelector('.deepstate-widget p').textContent = 'Click on the image to go to the map.';
+        } else {
+            document.querySelector('.theme-switch').textContent = 'Темна тема';
+            document.querySelector('.copyright p').textContent = 'Copyright: 2017-2025, MaxNT Official - Всі права захищені!';
+            document.querySelector('.widget h2').textContent = 'Календар';
+            document.querySelectorAll('.widget h2')[1].textContent = 'DeepState';
+            document.querySelectorAll('.widget h2')[2].textContent = 'Поточний час та дата';
+            document.querySelector('.deepstate-widget p').textContent = 'Натисніть на зображення, щоб перейти на мапу.';
+        }
+        updateClock(); // Оновлюємо годинник, щоб він змінив локаль
     }
 </script>
-<script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 
 </body>
 </html>

@@ -1,0 +1,107 @@
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вхід</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #2e7d32; /* Гарний зелений фон */
+            color: white;
+            flex-direction: column;
+            text-align: center;
+        }
+        .login-box {
+            background-color: #4caf50;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            width: 300px;
+            
+        }
+        .login-box h2 {
+            margin-bottom: 20px;
+        }
+        .login-box input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: none;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        .login-box button {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            background-color: #1b5e20;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .login-box button:hover {
+            background-color: #388e3c;
+        }
+        .message {
+            margin-top: 15px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .message.error {
+            color: #ffcdd2;
+        }
+        .message.success {
+            color: #c8e6c9;
+        }
+        .message span {
+            margin-right: 5px;
+        }
+        .copyright {
+            margin-top: 20px;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+    </style>
+</head>
+<body>
+
+<div class="login-box">
+    <h2>Вхід</h2>
+    <input type="password" id="password" placeholder="Введіть пароль">
+    <button onclick="checkPassword()">Увійти</button>
+    <div class="message" id="message"></div>
+</div>
+
+<div class="copyright">
+    <p>Copyright: 2017-2025, MaxNT Official - Всі права захищені!</p>
+</div>
+
+<script>
+    function checkPassword() {
+        const passwordInput = document.getElementById('password').value;
+        const messageDiv = document.getElementById('message');
+        const correctPassword = 'your_super_secret_password'; // Замініть на свій пароль
+
+        if (passwordInput === correctPassword) {
+            messageDiv.innerHTML = '<span style="font-size: 24px;">✅</span> Авторизовано успішно!';
+            messageDiv.className = 'message success';
+            setTimeout(() => {
+                window.location.href = 'widgets.html'; // Перенаправлення на сторінку з віджетами
+            }, 1500);
+        } else {
+            messageDiv.innerHTML = '<span style="font-size: 24px;">❗</span> Неправильний пароль!';
+            messageDiv.className = 'message error';
+        }
+    }
+</script>
+
+</body>
+</html>

@@ -1,62 +1,99 @@
 <html>
-<html lang="uk">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Віджети</title>
+    <title>Вхід</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #2e7d32; /* Гарний зелений фон */
-            color: #ffffff;
-            padding: 20px;
-            margin: 0;
             display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        .container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
             justify-content: center;
-            max-width: 1200px;
-            width: 100%;
-        }
-        .widget {
-            background-color: #4caf50;
+            align-items: center;
+            height: 100vh;
+            background-color: #388e3c; /* Гарний зелений фон */
+            color: #ffffff;
+            flex-direction: column;
+            text-align: center;
+            margin: 0;
             padding: 20px;
+        }
+        .login-box {
+            background-color: #4caf50;
+            padding: 40px;
             border-radius: 12px;
             box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
             width: 100%;
-            max-width: 500px;
+            max-width: 400px;
             box-sizing: border-box;
-            text-align: center;
         }
-        .widget h2 {
+        .login-box h2 {
             margin-top: 0;
-            font-size: 1.8em;
-            border-bottom: 2px solid #388e3c;
-            padding-bottom: 10px;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
+            font-size: 2em;
         }
-        iframe {
+        .input-group {
+            position: relative;
+            margin-bottom: 25px;
+        }
+        .input-group input[type="password"],
+        .input-group input[type="text"] {
             width: 100%;
-            height: 400px;
+            padding: 12px 15px;
             border: none;
             border-radius: 8px;
+            font-size: 1.1em;
+            background-color: #f1f1f1;
+            color: #333;
+            box-sizing: border-box;
         }
-        .deepstate-widget img {
-            max-width: 100%;
-            height: auto;
+        .input-group input:focus {
+            outline: none;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+        }
+        .captcha-box {
+            background-color: #388e3c;
+            color: white;
+            padding: 10px;
             border-radius: 8px;
-            transition: transform 0.3s ease;
+            margin-bottom: 15px;
+            font-size: 1.2em;
         }
-        .deepstate-widget a:hover img {
-            transform: scale(1.05);
+        .login-box button {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            background-color: #1b5e20;
+            color: white;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+        .login-box button:hover {
+            background-color: #2e7d32;
+            transform: translateY(-2px);
+        }
+        .message {
+            margin-top: 20px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1em;
+            min-height: 20px;
+        }
+        .message.error {
+            color: #ffccbc;
+        }
+        .message.success {
+            color: #c8e6c9;
+        }
+        .message span {
+            margin-right: 8px;
+            font-size: 1.5em;
         }
         .copyright {
-            margin-top: 40px;
+            margin-top: 30px;
             font-size: 0.9em;
             color: rgba(255, 255, 255, 0.7);
         }
@@ -64,29 +101,79 @@
 </head>
 <body>
 
-<div class="container">
-    <div class="widget">
-        <h2>Календар</h2>
-        <iframe src="https://calendar.google.com/calendar/embed?height=400&wkst=2&ctz=Europe%2FKiev&bgcolor=%234285F4&src=uk.ukrainian%23holiday%40group.v.calendar.google.com&color=%230B8043" style="border:solid 1px #777" frameborder="0" scrolling="no"></iframe>
+<div class="login-box">
+    <h2>Вхід</h2>
+    <div class="input-group">
+        <input type="password" id="password" placeholder="Введіть пароль">
     </div>
-
-    <div class="widget deepstate-widget">
-        <h2>DeepState</h2>
-        <a href="https://deepstatemap.live/" target="_blank" title="Перейти на DeepState Map">
-             <img src="https://deepstatemap.live/images/deepstate_logo_small_dark.png" alt="DeepState Map">
-        </a>
-        <p style="font-size: 0.9em; color: rgba(255, 255, 255, 0.8);">Натисніть на зображення, щоб перейти на мапу.</p>
+    <div class="captcha-box" id="captchaQuestion"></div>
+    <div class="input-group">
+        <input type="text" id="captchaAnswer" placeholder="Ваша відповідь">
     </div>
-
-    <div class="widget">
-        <h2>Пісочниця (гра)</h2>
-        <iframe src="https://ncase.me/fire/sand.html"></iframe>
-    </div>
+    <button onclick="checkLogin()">Увійти</button>
+    <div class="message" id="message"></div>
 </div>
 
 <div class="copyright">
     <p>Copyright: 2017-2025, MaxNT Official - Всі права захищені!</p>
 </div>
+
+<script>
+    const correctPassword = 'qwerty7111';
+    let captchaResult;
+
+    function generateCaptcha() {
+        const num1 = Math.floor(Math.random() * 10) + 1;
+        const num2 = Math.floor(Math.random() * 10) + 1;
+        const operators = ['+', '-', '*'];
+        const operator = operators[Math.floor(Math.random() * operators.length)];
+
+        let question;
+        let result;
+
+        if (operator === '+') {
+            question = `${num1} + ${num2} = ?`;
+            result = num1 + num2;
+        } else if (operator === '-') {
+            // Щоб уникнути від'ємних результатів
+            const a = Math.max(num1, num2);
+            const b = Math.min(num1, num2);
+            question = `${a} - ${b} = ?`;
+            result = a - b;
+        } else {
+            question = `${num1} * ${num2} = ?`;
+            result = num1 * num2;
+        }
+
+        document.getElementById('captchaQuestion').textContent = `Вирішіть: ${question}`;
+        return result;
+    }
+
+    function checkLogin() {
+        const passwordInput = document.getElementById('password').value;
+        const captchaAnswer = document.getElementById('captchaAnswer').value;
+        const messageDiv = document.getElementById('message');
+
+        // Перевірка пароля та капчі
+        if (passwordInput === correctPassword && parseInt(captchaAnswer) === captchaResult) {
+            messageDiv.innerHTML = '<span>✅</span> Авторизовано успішно!';
+            messageDiv.className = 'message success';
+            setTimeout(() => {
+                window.location.href = 'widgets.html';
+            }, 1500);
+        } else {
+            messageDiv.innerHTML = '<span>❗</span> Неправильний пароль або капча!';
+            messageDiv.className = 'message error';
+            captchaResult = generateCaptcha(); // Генеруємо нову капчу після невдалої спроби
+            document.getElementById('captchaAnswer').value = '';
+        }
+    }
+
+    // Генеруємо першу капчу при завантаженні сторінки
+    window.onload = function() {
+        captchaResult = generateCaptcha();
+    };
+</script>
 
 </body>
 </html>
